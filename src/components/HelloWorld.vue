@@ -1,94 +1,94 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
     <ul>
       <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
-        >
-          Core Docs
-        </a>
+        <button @click="changeA">点击A加1</button>
+        {{A}}
       </li>
       <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
+        <button @click="changeB">点击B加2</button>
+        {{B}}
       </li>
       <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
+        <button @click="changeC">点击C加3</button>
+        {{C}}
       </li>
     </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
+    <div>
+      <button @click="toGetterTest">跳转到Vuex Getter测试</button>
+    </div>
+    <div>
+      <button @click="toMutationTest">跳转到Vuex Mutation测试</button>
+    </div>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   name: 'HelloWorld',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      count: this.$store.state.count,
+      text:"Hello Vuex",
+    }
+  },
+  // computed: mapState({
+  //   // 箭头函数简单返回
+  //   A:state => state.A,
+  //   // 字符串参数 B 相当于 state.B，只需要保证字符串内容与状态名相同。
+  //   B:'B',
+  //   // 在普通函数中使用关键字this
+  //   C(state){
+  //     console.log('在普通函数中使用关键字this：',this.text);
+  //     return state.C
+  //   }
+  // }),
+  // 只需要保证字符串数组值与状态名同步
+  // computed: mapState(['A','B','C']),
+  computed: {
+    // mapState与局部计算属性混合使用
+    // 需要使用对象扩展运算符，因为mapState返回的是一个对象
+    ...mapState({
+      // 箭头函数简单返回
+      A:state => state.A,
+      // 字符串参数 B 相当于 state.B，只需要保证字符串内容与状态名相同。
+      B:'B',
+      // 在普通函数中使用关键字this
+      C(state){
+        console.log('在普通函数中使用关键字this：',this.text);
+        return state.C;
+      }
+    }),
+    // 组件其他计算属性
+    name(){
+      return 'SK';
+    },
+    age(){
+      return '18';
+    }
+  },
+  methods:{
+    changeCount(){
+      // 只能通过 commit 改变状态
+      this.$store.commit('changeCount');
+      // 使用状态
+      this.count = this.$store.state.count;
+    },
+    changeA(){
+      this.$store.commit('changeA');
+    },
+    changeB(){
+      this.$store.commit('changeB');
+    },
+    changeC(){
+      this.$store.commit('changeC');
+    },
+    toGetterTest(){
+      this.$router.push('/GetterTest');
+    },
+    toMutationTest(){
+      this.$router.push('/MutationTest');
     }
   }
 }
