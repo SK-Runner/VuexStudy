@@ -261,7 +261,11 @@ getEmplists:state => (age) =>{
 
 ### 3、Mutation
 
-​		mutations 类似于事件，这里的“事件名”被称为**事件类型**，“方法体”被称为**回调函数**，每个 mutation 都会接受 state 作为第一个参数。store.commit（）第一个参数为 mutations 的 type（名称），第二个参数为 mutation 的 **载荷**（payload）。
+​		mutations 类似于事件，这里的“事件名”被称为**事件类型**，“方法体”被称为**回调函数**。
+
+​		每个 mutation 都会接受 state 作为第一个参数。store.commit（）第一个参数为 mutations 的 type（名称），第二个参数为 mutation 的 **载荷**（payload）。
+
+​		**注意**：在Mutations中的事务都是同步的。
 
 ```javascript
 // 组件中调用 commit()，第二个参数对应 payload
@@ -323,7 +327,143 @@ changeText(state,payload){
 
 ​		最后可以使用 mapMutations 辅助函数将组件中的 methods 映射为 store.commit 调用。
 
+### 4、Action
 
+​		Actions 可以包含任意异步操作，**它并不是直接变更状态**，而是通过提交 mutation 变更状态。
+
+​		Actions 中的函数接受一个与 store 实例具有相同方法和属性的 context 对象。可以通过 context.commit() 提交 mutation，context.state 或 context.getters 获取 state 或 getter。
+
+#### 		为什么 context 对象不是实例本身？
+
+​		普通用法：
+
+```javascript
+// 定义 action 函数，参数为 context对象
+actions:{
+    addNumber(context){
+        setTimeout(() => {
+            context.commit('addNumber');
+        }, 1000);
+    }
+}
+
+
+// 解构赋值写法
+actions:{
+    addNumber({commit}){
+        setTimeout(() => {
+            commit('addNumber');
+        }, 1000);
+    }
+}
+```
+
+```javascript
+// 触发Actions
+this.$store.dispatch('addNumber');
+```
+
+​		使用荷载：
+
+```javascript
+// actions 使用荷载 payload 
+actions:{
+    addNumber({commit},payload){
+        setTimeout(() => {
+        	commit('addNumber');
+        }, payload.times);
+    }
+}
+```
+
+```javascript
+// 荷载方式分发
+this.$store.dispatch({
+    type: 'addNumber',
+    times: 2000
+});
+
+// 对象方式分发
+this.$store.dispatch('addNumber', {
+    times: 2000
+});
+```
+
+​		**组合 Actions**
+
+​		案例：利用组合 Actions，实现1s后获取班级信息，展示班级信息 1s 后获取学生列表并展示。
+
+```javascript
+// 在组件时分发 action（getClassInfo返回了一个promise对象）
+getInfo(){
+    this.$store.dispatch('getClassInfo').then(res=>{
+		this.$store.dispatch('getStudentList');
+    });
+}
+```
+
+```javascript
+// 在actions中定义
+getClassInfo({commit}){
+    return new Promise((resolve,reject)=>{
+        setTimeout(() => {
+            commit('getClassInfo');
+            resolve();
+        }, 1000);
+    })
+},
+getStudentList({commit}){
+    setTimeout(() => {
+        commit('getStudentList');
+    }, 1000);
+},
+```
+
+​		使用 async / await 方式代替 Promise对象
+
+```javascript
+async getClassInfo({commit}){
+	return new Promise((resolve,reject)=>{
+		setTimeout(() => {
+			commit('getClassInfo');
+			resolve();
+		}, 1000);
+	})
+},
+
+async getStudentList({commit}){
+	setTimeout(() => {
+		commit('getStudentList');
+	}, 1000);
+},
+async getInfo({dispatch,commit}){
+	// 执行完getClassInfo后再执行getStudentList
+	await dispatch('getClassInfo');
+	await dispatch('getStudentList');
+}
+```
+
+
+
+### 5、Module
+
+​		应用所有状态集中到同一 store 对象时，整个程序会变得复杂臃肿，因此允许将 store 整体分割为模块（module），每个模块拥有自己的 state、mutations、getters等，也可以嵌套自己的子模块。
+
+​		使用 Module
+
+```javascript
+// 定义 module
+export default {
+    state: {},
+    getters: {},
+    mutations: {},
+    actions:{}
+}
+```
+
+#### 		模块局部状态：
+
+​		模块内部的 mutation 和 getter ，接收的第一个参数是**模块的局部状态对象** **state**；模块内部的action，局部状态 context 对象除了拥有 state 和 commit 获取和改变局部状态之外，还拥有 **rootState** 属性获取**根节点状态**；模块内部的 getter，根节点状态 **rootState** 会作为第三个参数暴露出来。
 
 
 

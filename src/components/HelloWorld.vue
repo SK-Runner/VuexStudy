@@ -20,6 +20,9 @@
     <div>
       <button @click="toMutationTest">跳转到Vuex Mutation测试</button>
     </div>
+    <div>
+      <button @click="toActionTest">跳转到Vuex Action测试</button>
+    </div>
   </div>
 </template>
 
@@ -89,6 +92,9 @@ export default {
     },
     toMutationTest(){
       this.$router.push('/MutationTest');
+    },
+    toActionTest(){
+      this.$router.push('/ActionTest');
     }
   }
 }
