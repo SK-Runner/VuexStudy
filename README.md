@@ -511,7 +511,7 @@ getters: {
 
 ​		当你启用命名空间时，访问该模块内状态、调用 Mutations 等方法的方式都要改变。
 
-```
+```javascript
 computed:{
 	number(){
 	    //['模块名/方法名']
@@ -529,4 +529,113 @@ methods:{
 	}
 }
 ```
+
+##### Getters 变更：带命名空间的模块访问全局内容
+
+```javascript
+    getters: {
+        // 带命名空间的模块，getters会将rootGetters作为第四参数
+        getNumber: (state,getters,rootState,rootGetters) => {
+            // rootState.全局状态名
+            // rootGetters.全局gettes名
+        },
+    },
+```
+
+##### Actions变更：带命名空间的模块访问全局内容、声明全局 Action
+
+```javascript
+//访问全局内容
+actions:{
+    asyncChangeNumber(context){
+        setTimeout(() => {
+            context.commit('changeNumber')
+            // rootState 可以获取根节点状态
+            console.log(context.rootState.count);
+            // 访问根节点 Mutations 和 Actions
+            // context.commit('根Mutations函数名',payload,{root:true});
+            // context.diapatch('根Actions函数名',payload,{root:true});
+        }, 1000);
+    }
+}
+
+actions:{
+    // 在命名空间中注册全局Actions，将函数体放在handler函数中
+    rootAction: {
+        root:true,
+            handler(namespacedContext, payload){
+            // 函数体
+        }
+    }
+}
+```
+
+
+
+#####  带命名空间的绑定函数
+
+当使用 `mapState`, `mapGetters`, `mapActions` 和 `mapMutations` 这些函数来绑定带命名空间的模块时，写起来可能比较繁琐：
+
+```js
+computed: {
+  ...mapState({
+    a: state => state.some.nested.module.a,
+    b: state => state.some.nested.module.b
+  })
+},
+methods: {
+  ...mapActions([
+    'some/nested/module/foo', // -> this['some/nested/module/foo']()
+    'some/nested/module/bar' // -> this['some/nested/module/bar']()
+  ])
+}
+```
+
+对于这种情况，你可以将模块的空间名称字符串作为第一个参数传递给上述函数，这样所有绑定都会自动将该模块作为上下文。于是上面的例子可以简化为：
+
+```js
+computed: {
+  ...mapState('some/nested/module', {
+    a: state => state.a,
+    b: state => state.b
+  })
+},
+methods: {
+  ...mapActions('some/nested/module', [
+    'foo', // -> this.foo()
+    'bar' // -> this.bar()
+  ])
+}
+```
+
+而且，你可以通过使用 `createNamespacedHelpers` 创建基于某个命名空间辅助函数。它返回一个对象，对象里有新的绑定在给定命名空间值上的组件绑定辅助函数：
+
+```js
+import { createNamespacedHelpers } from 'vuex'
+
+const { mapState, mapActions } = createNamespacedHelpers('some/nested/module')
+
+export default {
+  computed: {
+    // 在 `some/nested/module` 中查找
+    ...mapState({
+      a: state => state.a,
+      b: state => state.b
+    })
+  },
+  methods: {
+    // 在 `some/nested/module` 中查找
+    ...mapActions([
+      'foo',
+      'bar'
+    ])
+  }
+}
+```
+
+
+
+
+
+
 
