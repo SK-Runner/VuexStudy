@@ -139,7 +139,7 @@ methods:{
 
 ### 2、Vuex 的核心概念
 
-#### （1）State 单一状态树
+#### State 单一状态树
 
 ​		Vuex的状态存储是响应式的，从 store 实例中读取状态最简单的方式是计算属性。一个组件需要获取多个状态时，重复声明计算属性会导致重复和代码冗余，因此使用 mapState 辅助函数可以帮助生成计算属性。
 
@@ -461,13 +461,72 @@ export default {
 }
 ```
 
-#### 		模块局部状态：
+#### 		模块局部状态
 
-​		模块内部的 mutation 和 getter ，接收的第一个参数是**模块的局部状态对象** **state**；模块内部的action，局部状态 context 对象除了拥有 state 和 commit 获取和改变局部状态之外，还拥有 **rootState** 属性获取**根节点状态**；模块内部的 getter，根节点状态 **rootState** 会作为第三个参数暴露出来。
+​		模块内部的 mutation 和 getter ，接收的第一个参数是**模块的局部状态对象** **state**。
 
+```javascript
+//mutations 和 getters 中的 state 对象只能获取当前 module 的 state 状态
+getters: {
+	getNumber: state => state.number++,
+},
+mutations: {
+	changeNumber(state){
+		state.number++;
+	},
+},
+```
 
+​		模块内部的action，局部状态 context 对象除了拥有 state 和 commit 获取和改变局部状态之外，还拥有 **rootState** 属性获取**根节点状态**。
 
+```javascript
+actions:{
+	asyncChangeNumber(context){
+        setTimeout(() => {
+            context.commit('changeNumber')
+            // rootState 可以获取根节点状态
+            console.log(context.rootState.count);
+        }, 1000);
+    }
+}
+```
 
+​		模块内部的 getter，根节点状态 **rootState** 会作为第三个参数暴露出来。
 
+```javascript
+getters: {
+	getNumber: (state,getters,rootState) => {
+    	// getter同样可以通过 rootState 获取根节点状态
+		console.log(rootState.test);
+		return state.number++;
+	},
+},
+```
 
+#### 命名空间
+
+​		引入模块 module 出现的问题是：默认情况下，模块内部的 actions、mutations 以及 getters 是注册在全局命名空间的，例如 commit("changeNumber") 可以对所有 module 中函数名为 changeNumber 的 Mutations做出相应。
+
+​		如果希望模块拥有更高的封装度和复用性，可以添加 **namespaced : true** 的方式，使其成为带命名空间的模块。
+
+​		当你启用命名空间时，访问该模块内状态、调用 Mutations 等方法的方式都要改变。
+
+```
+computed:{
+	number(){
+	    //['模块名/方法名']
+		return this.$store.getters['ModuleTest/getNumber'];
+	}
+},
+methods:{
+	numberAdd(){
+		//('模块名/方法名')
+		this.$store.commit('ModuleTest/changeNumber');
+	},
+	numberChange(){
+		//('模块名/方法名')
+		this.$store.dispatch('ModuleTest/asyncChangeNumber')
+	}
+}
+```
 

@@ -23,6 +23,9 @@
     <div>
       <button @click="toActionTest">跳转到Vuex Action测试</button>
     </div>
+    <div>
+      <button @click="toModuleTest">跳转到Vuex Module测试</button>
+    </div>
   </div>
 </template>
 
@@ -49,6 +52,7 @@ export default {
   // }),
   // 只需要保证字符串数组值与状态名同步
   // computed: mapState(['A','B','C']),
+
   computed: {
     // mapState与局部计算属性混合使用
     // 需要使用对象扩展运算符，因为mapState返回的是一个对象
@@ -95,6 +99,9 @@ export default {
     },
     toActionTest(){
       this.$router.push('/ActionTest');
+    },
+    toModuleTest(){
+      this.$router.push('/ModuleTest');
     }
   }
 }

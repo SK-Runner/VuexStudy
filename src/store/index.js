@@ -3,13 +3,15 @@ import vuex from 'vuex'
 import 'es6-promise/auto'
 import GetterTest from './module/GetterTest'
 import MutationTest from './module/MutationTest'
+import ModuleTest from './module/ModuleTest'
 
 Vue.use(vuex)
 
 export default new vuex.Store({
     modules:{
         GetterTest,
-        MutationTest
+        MutationTest,
+        ModuleTest
     },
     state: {
         count: 0,
@@ -23,6 +25,7 @@ export default new vuex.Store({
             status: ''
         },
         studentList: [],
+        test:'你好'
     },
     mutations: {
         changeCount(state){
@@ -37,7 +40,8 @@ export default new vuex.Store({
         changeC(state){
             state.C += 3;
         },
-        addNumber(state){
+        changeNumber(state){
+            console.log('你好');
             state.number++;
         },
         getClassInfo(state){
